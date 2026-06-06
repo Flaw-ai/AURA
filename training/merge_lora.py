@@ -1,5 +1,5 @@
 from peft import (PeftModel)
-from transformers import (AutoModelForCausalLM)
+#from transformers import (AutoModelForCausalLM)
 
 
 def merge_models(
