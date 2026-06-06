@@ -10,8 +10,16 @@ class TokenizerBuilder:
     def load_tokenizer(self, save_path):
         return AutoTokenizer.from_pretrained(save_path)
 
-    def add_special_tokens(self, tokenizer, special_tokens):
+    def add_special_tokens(
+        self,
+        tokenizer,
+        special_tokens=None
+    ):
+        if special_tokens is None:
+            special_tokens = self.special_tokens_dict()
+            
         tokenizer.add_special_tokens(special_tokens)
+        return tokenizer
 
     def save_tokenizer(self, tokenizer, save_path):
         tokenizer.save_pretrained(save_path)
