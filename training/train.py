@@ -1,40 +1,40 @@
 import yaml
-from trainers.sft_trainer import (SFTTrainer)
-from trainers.dpo_trainer import (DPOTrainer)
-from trainers.curriculum_trainer import (CurriculumTrainer)
+from trainers.sft_trainer import SFTTrainer
+from trainers.dpo_trainer import DPOTrainer
+from trainers.curriculum_trainer import CurriculumTrainer
 
-def main():
+
+def load_config():
     with open(
-        "configs/train.yaml",
+        "training/configs/train.yaml",
         "r"
     ) as f:
-        config = yaml.safe_load(f)
+        return yaml.safe_load(f)
 
+
+def build_trainer(config):
     trainer_type = config.get(
         "trainer",
         "sft"
     )
 
-    if trainer_type == "sft":
-        trainer = SFTTrainer(
-            config
-        )
+    mapping = {
+        "sft": SFTTrainer,
+        "dpo": DPOTrainer,
+        "curriculum": CurriculumTrainer
+    }
 
-    elif trainer_type == "dpo":
-        trainer = DPOTrainer(
-            config
-        )
+    if trainer_type not in mapping:
+        raise ValueError(f"Unknown trainer: {trainer_type}")
 
-    elif trainer_type == "curriculum":
-        trainer = CurriculumTrainer(
-            config
-        )
+    return mapping[trainer_type](config)
 
-    else:
-        raise ValueError(
-            "Unknown trainer"
-        )
+
+def main():
+    config = load_config()
+    trainer = build_trainer(config)
     trainer.train()
+
 
 if __name__ == "__main__":
     main()
