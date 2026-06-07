@@ -1,0 +1,12 @@
+task: dpo
+beta: 0.1
+loss_type: sigmoid
+max_prompt_length: 1024
+max_length: 2048
+epochs: 1
+batch_size: 2
+gradient_accumulation_steps: 8
+learning_rate: 5e-6
+prompt_field: prompt
+chosen_field: chosen
+rejected_field: rejected

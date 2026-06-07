@@ -1,0 +1,18 @@
+task: sft
+dataset_text_field: text
+max_seq_length: 2048
+packing: true
+shuffle: true
+train_split: 0.95
+validation_split: 0.05
+special_tokens:
+  - "<|user|>"
+  - "<|assistant|>"
+  - "<|system|>"
+curriculum_learning: true
+curriculum_stages:
+  - easy
+  - medium
+  - hard
+  - exam
+  - tutor
