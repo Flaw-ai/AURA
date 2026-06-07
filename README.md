@@ -4,4 +4,6 @@
 
 This is the folder where I will define all the issues that I faced in this project, something new I implemented and function of all files.
 
+AI help taken- Claude, ChatGPT
+
 ## Training
