@@ -1,1 +1,17 @@
-# Placeholder stub
+import torch
+import torch.nn as nn
+
+class RMSNorm(nn.Module):
+    def __init__(self, hidden_size, eps=1e-8):
+        super().__init__()
+        self.weight = nn.Parameter(torch.ones(hidden_size))
+        self.eps = eps
+
+    def forward(self, x):
+        dtype = x.dtype
+        x = x.float()
+        variance = (x.pow(2).mean(dim=-1, keepdim=True))
+
+        x = (x * torch.rsqrt(variance + self.eps))
+
+        return (self.weight * x).to(dtype)
