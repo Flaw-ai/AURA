@@ -4,13 +4,13 @@ config_path: models/flaw/config.json
 dataset_path: datasets/cleaned/tutoring/train.json
 output_dir: outputs/checkpoints
 seed: 42
-epochs: 5
-batch_size: 8
-gradient_accumulation_steps: 4
+epochs: 3
+batch_size: 4
+gradient_accumulation_steps: 8
 learning_rate: 3e-4
 weight_decay: 0.1
 warmup_ratio: 0.05
-max_length: 2048
+max_length: 1024
 save_steps: 500
 logging_steps: 50
 eval_steps: 250
