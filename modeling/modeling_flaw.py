@@ -4,8 +4,12 @@ from typing import List, Optional, Tuple, Union
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from transformers import PreTrainedModel
+from transformers import (
+    PreTrainedModel,
+    GenerationMixin
+)
 from transformers.modeling_outputs import CausalLMOutputWithPast, BaseModelOutputWithPast
+from modeling.configuration_flaw import FlawConfig
 
 class FlawRMSNorm(nn.Module):
     def __init__(self, hidden_size: int, eps: float = 1e-6):
@@ -342,10 +346,10 @@ class FlawModel(PreTrainedModel):
             attentions=all_attns or None,
         )
 
-class FlawForCausalLM(PreTrainedModel):
+class FlawForCausalLM(PreTrainedModel, GenerationMixin):
     config_class = FlawConfig
     base_model_prefix = "model"
-    _tied_weights_keys = ["lm_head.weight"]
+    _tied_weights_keys = {"lm_head.weight": "model.embed_tokens.weight"}
 
     def __init__(self, config: FlawConfig):
         super().__init__(config)

@@ -1,31 +1,25 @@
 from pathlib import Path
 import json
+from datasets import Dataset
 from transformers import (
     AutoTokenizer,
-    AutoModelForCausalLM,
     Trainer,
-    TrainingArguments
+    TrainingArguments,
+    DataCollatorForLanguageModeling
 )
-
-from datasets import Dataset
+from modeling.modeling_flaw import (
+    FlawConfig,
+    FlawForCausalLM
+)
 from trainers.base_trainer import (
     BaseTrainer
 )
 
-class SFTTrainer(
-    BaseTrainer
-):
-    def __init__(
-        self,
-        config
-    ):
+class SFTTrainer(BaseTrainer):
+    def __init__(self, config):
         super().__init__(config)
-        self.model_name = (
-            config["model_name"]
-        )
-        self.dataset_path = (
-            config["dataset_path"]
-        )
+        self.dataset_path = config["dataset_path"]
+        self.config_path = config["config_path"]
         self.model = None
         self.tokenizer = None
 
@@ -40,51 +34,55 @@ class SFTTrainer(
         ) as f:
             data = json.load(f)
         conversations = []
+
         for item in data:
             text = ""
-            for msg in item[
-                "messages"
-            ]:
+
+            for msg in item["messages"]:
+                role = msg["role"]
+                content = msg["content"]
                 text += (
-                    f"{msg['role']}: "
-                    f"{msg['content']}\n"
+                    f"<|{role}|>\n"
+                    f"{content}\n"
                 )
             conversations.append(
                 {"text": text}
             )
-        dataset = Dataset.from_list(
-            conversations
-        )
-        self.logger.info(
-            f"Loaded "
-            f"{len(dataset)} samples"
-        )
+
+        dataset = Dataset.from_list(conversations)
+        self.logger.info(f"Loaded {len(dataset)} samples")
         return dataset
 
     def build_model(self):
         self.logger.info(
-            "Loading model..."
+            "Building Flaw model..."
         )
-        self.tokenizer = (
-            AutoTokenizer
-            .from_pretrained(
-                self.model_name
-            )
+        with open(
+            self.config_path,
+            "r",
+            encoding="utf-8"
+        ) as f:
+            cfg = json.load(f)
+
+        flaw_config = FlawConfig(
+            **cfg
         )
         self.model = (
-            AutoModelForCausalLM
-            .from_pretrained(
-                self.model_name
-            )
+            FlawForCausalLM(flaw_config)
         )
-        self.logger.info(
-            "Model loaded."
+        self.tokenizer = (
+            AutoTokenizer.from_pretrained("models/flaw")
         )
 
-    def tokenize(
-        self,
-        dataset
-    ):
+        if self.tokenizer.pad_token is None:
+            self.tokenizer.pad_token = (self.tokenizer.eos_token)
+
+        self.logger.info(
+            f"Parameters: "
+            f"{self.model.num_parameters:,}"
+        )
+
+    def tokenize(self, dataset):
         def tokenizer_fn(examples):
             return self.tokenizer(
                 examples["text"],
@@ -94,80 +92,101 @@ class SFTTrainer(
                     2048
                 )
             )
-
         return dataset.map(
             tokenizer_fn,
-            batched=True
+            batched=True,
+            remove_columns=["text"]
+        )
+
+    def build_collator(self):
+        return (
+            DataCollatorForLanguageModeling(
+                tokenizer=self.tokenizer,
+                mlm=False
+            )
         )
 
     def train(self):
-        dataset = (
-            self.load_dataset()
-        )
+        dataset = (self.load_dataset())
         self.build_model()
         tokenized_dataset = (
-            self.tokenize(
-                dataset
+            self.tokenize(dataset)
+        )
+
+        training_args = (
+            TrainingArguments(
+                output_dir=str(
+                    self.output_dir
+                ),
+                overwrite_output_dir=True,
+                num_train_epochs=
+                self.config.get(
+                    "epochs",
+                    5
+                ),
+                per_device_train_batch_size=
+                self.config.get(
+                    "batch_size",
+                    8
+                ),
+                gradient_accumulation_steps=
+                self.config.get(
+                    "gradient_accumulation_steps",
+                    4
+                ),
+                learning_rate=float(
+                    self.config.get(
+                        "learning_rate",
+                        3e-4
+                    )
+                ),
+                weight_decay=float(
+                    self.config.get(
+                        "weight_decay",
+                        0.1
+                    )
+                ),
+                warmup_ratio=float(
+                    self.config.get(
+                        "warmup_ratio",
+                        0.05
+                    )
+                ),
+                logging_steps=
+                self.config.get(
+                    "logging_steps",
+                    50
+                ),
+                save_steps=
+                self.config.get(
+                    "save_steps",
+                    500
+                ),
+                eval_strategy="no",
+                bf16=self.config.get(
+                    "mixed_precision",
+                    "bf16"
+                ) == "bf16",
+                gradient_checkpointing=
+                self.config.get(
+                    "gradient_checkpointing",
+                    True
+                ),
+                report_to="none"
             )
         )
-        args = TrainingArguments(
-            output_dir=str(
-                self.output_dir
-            ),
-            num_train_epochs=
-            self.config.get(
-                "epochs",
-                3
-            ),
-            per_device_train_batch_size=
-            self.config.get(
-                "batch_size",
-                2
-            ),
-            learning_rate=
-            self.config.get(
-                "learning_rate",
-                2e-5
-            ),
-            logging_steps=
-            self.config.get(
-                "logging_steps",
-                50
-            ),
-            save_steps=
-            self.config.get(
-                "save_steps",
-                500
-            ),
-            report_to="none"
-        )
-
         trainer = Trainer(
             model=self.model,
-            args=args,
-            train_dataset=
-            tokenized_dataset
+            args=training_args,
+            train_dataset=tokenized_dataset,
+            data_collator=
+            self.build_collator()
         )
-
-        self.logger.info(
-            "Training started..."
-        )
-
+        self.logger.info("Training started...")
         trainer.train()
-
-        trainer.save_model(
-            self.output_dir
-        )
-
-        self.logger.info(
-            "Training complete."
-        )
+        trainer.save_model(self.output_dir)
+        self.tokenizer.save_pretrained(self.output_dir)
+        self.logger.info("Training complete.")
 
     def evaluate(self):
-        self.logger.info(
-            "Evaluation placeholder."
-        )
-        return {
-            "status":
-            "not_implemented"
-        }
+        return {"status": "not_implemented"}
