@@ -8,34 +8,43 @@ def collect_data():
         exist_ok=True
     )
 
-    sample = {
-        "messages": [
-            {
-                "role": "user",
-                "content":
-                "What is gravity?"
-            },
-            {
-                "role": "assistant",
-                "content":
-                "Gravity is the force that attracts objects toward each other."
-            }
-        ]
-    }
-
-    output = (
-        "datasets/raw/conversations/"
-        "bootstrap.jsonl"
-    )
+    dataset = [
+        {
+            "messages": [
+                {
+                    "role": "user",
+                    "content": "What is gravity?"
+                },
+                {
+                    "role": "assistant",
+                    "content": "Gravity is the force that attracts objects toward each other."
+                }
+            ]
+        },
+        {
+            "messages": [
+                {
+                    "role": "user",
+                    "content": "What is photosynthesis?"
+                },
+                {
+                    "role": "assistant",
+                    "content": "Photosynthesis is how plants make food."
+                }
+            ]
+        }
+    ]
 
     with open(
-        output,
+        "datasets/raw/conversations/bootstrap.json",
         "w",
         encoding="utf-8"
     ) as f:
-        f.write(
-            json.dumps(sample)
-            + "\n"
+        json.dump(
+            dataset,
+            f,
+            ensure_ascii=False,
+            indent=2
         )
 
     print("Bootstrap dataset created.")

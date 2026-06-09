@@ -147,3 +147,9 @@ def convert_jsonl_to_messages(
         )
 
     print(f"Converted {len(converted)} rows")
+    
+if __name__ == "__main__":
+    convert_jsonl_to_messages(
+        input_file="datasets/raw/conversations/bootstrap.jsonl",
+        output_file="datasets/cleaned/filtered/filtered.json"
+    )

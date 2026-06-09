@@ -1,0 +1,15 @@
+[
+  {
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is photosynthesis?"
+      },
+      {
+        "role": "assistant",
+        "content": "Photosynthesis is how plants make food."
+      }
+    ],
+    "rank_score": 1.0
+  }
+]

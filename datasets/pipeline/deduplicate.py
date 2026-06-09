@@ -47,3 +47,9 @@ def deduplicate_dataset(
     print(
         f"Unique examples: {len(unique)}"
     )
+    
+if __name__ == "__main__":
+    deduplicate_dataset(
+        "datasets/cleaned/filtered/filtered.json",
+        "datasets/cleaned/reasoning/reasoning.json"
+    )

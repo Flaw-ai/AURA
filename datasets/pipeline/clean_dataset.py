@@ -84,3 +84,9 @@ def clean_dataset(
     print(
         f"Saved {len(cleaned)} examples"
     )
+
+if __name__ == "__main__":
+    clean_dataset(
+        input_file="datasets/raw/conversations/bootstrap.json",
+        output_file="datasets/cleaned/filtered/filtered.json"
+    )

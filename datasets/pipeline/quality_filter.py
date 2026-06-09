@@ -57,3 +57,9 @@ def filter_dataset(
     print(
         f"Filtered examples: {len(filtered)}"
     )
+    
+if __name__ == "__main__":
+    filter_dataset(
+        "datasets/cleaned/reasoning/reasoning.json",
+        "datasets/cleaned/exam_qa/exam_qa.json"
+    )
