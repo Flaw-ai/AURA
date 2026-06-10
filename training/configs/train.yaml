@@ -14,5 +14,5 @@ max_length: 1024
 save_steps: 500
 logging_steps: 50
 eval_steps: 250
-gradient_checkpointing: true
+gradient_checkpointing: false
 mixed_precision: bf16
