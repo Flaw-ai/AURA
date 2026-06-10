@@ -79,7 +79,7 @@ class SFTTrainer(BaseTrainer):
 
         self.logger.info(
             f"Parameters: "
-            f"{self.model.num_parameters:,}"
+            f"{self.model.total_parameters:,}"
         )
 
     def tokenize(self, dataset):
