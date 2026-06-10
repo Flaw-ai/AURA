@@ -118,7 +118,6 @@ class SFTTrainer(BaseTrainer):
                 output_dir=str(
                     self.output_dir
                 ),
-                overwrite_output_dir=True,
                 num_train_epochs=
                 self.config.get(
                     "epochs",
