@@ -454,15 +454,22 @@ class FlawForCausalLM(PreTrainedModel, GenerationMixin):
         )
 
     @property
-    def num_parameters(self) -> int:
+    def total_parameters(self) -> int:
         return sum(p.numel() for p in self.parameters())
 
     @property
-    def num_trainable_parameters(self) -> int:
-        return sum(p.numel() for p in self.parameters() if p.requires_grad)
-
+    def total_trainable_parameters(self) -> int:
+        return sum(
+            p.numel() for p in self.parameters() if p.requires_grad
+        )
+        
+    def num_parameters(self, exclude_embeddings=False):
+        return sum(
+            p.numel() for p in self.parameters()
+        )
+        
     def model_size_mb(self) -> float:
-        return self.num_parameters * 4 / 1024 ** 2
+        return self.total_parameters * 4 / 1024 ** 2
 
     def __repr__(self):
         cfg = self.config
@@ -472,5 +479,5 @@ class FlawForCausalLM(PreTrainedModel, GenerationMixin):
             f"hidden={cfg.hidden_size}, "
             f"layers={cfg.num_hidden_layers}, "
             f"heads={cfg.num_attention_heads}q/{cfg.num_key_value_heads}kv, "
-            f"params={self.num_parameters:,})"
+            f"params={self.total_parameters:,})"
         )
