@@ -1,3 +1,7 @@
+import sys
+from pathlib import Path
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 import yaml
 from trainers.sft_trainer import SFTTrainer
 from trainers.dpo_trainer import DPOTrainer
