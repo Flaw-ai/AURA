@@ -27,28 +27,24 @@ class SFTTrainer(BaseTrainer):
         self.logger.info(
             "Loading dataset..."
         )
+        conversations = []
         with open(
             self.dataset_path,
             "r",
             encoding="utf-8"
         ) as f:
-            data = json.load(f)
-        conversations = []
-
-        for item in data:
-            text = ""
-
-            for msg in item["messages"]:
-                role = msg["role"]
-                content = msg["content"]
-                text += (
-                    f"<|{role}|>\n"
-                    f"{content}\n"
-                )
-            conversations.append(
-                {"text": text}
-            )
-
+            for line in f:
+                item = json.loads(line)
+                text = ""
+                for msg in item["messages"]:
+                    role = msg["role"]
+                    content = msg["content"]
+                    text += (
+                        f"<|{role}|>\n"
+                        f"{content}\n"
+                    )
+                conversations.append({"text": text})
+                
         dataset = Dataset.from_list(conversations)
         self.logger.info(f"Loaded {len(dataset)} samples")
         return dataset
