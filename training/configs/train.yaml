@@ -1,18 +1,21 @@
 trainer: sft
 model_type: flaw
 config_path: models/flaw/config.json
-dataset_path: datasets/cleaned/tutoring/train.json
+dataset:
+  train_path: /kaggle/working/train.jsonl
+  val_path: /kaggle/working/val.jsonl
+  test_path: /kaggle/working/test.jsonl
 output_dir: outputs/checkpoints
 seed: 42
-epochs: 3
 batch_size: 4
 gradient_accumulation_steps: 8
 learning_rate: 3e-4
 weight_decay: 0.1
 warmup_ratio: 0.05
 max_length: 1024
-save_steps: 500
-logging_steps: 50
-eval_steps: 250
-gradient_checkpointing: false
+max_steps: 50000
+save_steps: 1000
+eval_steps: 1000
+logging_steps: 25
+gradient_checkpointing: true
 mixed_precision: bf16

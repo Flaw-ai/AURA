@@ -1,43 +1,25 @@
-from sft.dataset_loader import (DatasetLoader)
-from sft.formatting import (ConversationFormatter)
+from sft.dataset_loader import DatasetLoader
+from sft.formatting import ConversationFormatter
 
 class TrainingPipeline:
-    def __init__(self, dataset_path):
-
-        self.dataset_path = (dataset_path)
+    def __init__(self, config):
+        self.config = config
 
     def prepare(self):
-
-        loader = DatasetLoader(self.dataset_path)
-        dataset = loader.load()
-        stats = loader.statistics(dataset)
-
-        print("\nDATASET STATS")
-        print(stats)
-
-        split = (
-            loader
-            .train_val_split(
-                dataset
-            )
+        loader = DatasetLoader(
+            train_path=self.config["dataset"]["train_path"],
+            val_path=self.config["dataset"]["val_path"],
+            test_path=self.config["dataset"]["test_path"]
         )
-
-        formatter = (
-            ConversationFormatter()
-        )
-
+        datasets = loader.load()
+        loader.print_stats(datasets)
+        formatter = ConversationFormatter()
         train_data = (
-            formatter
-            .format_dataset(
-                split["train"]
-            )
+            formatter.format_dataset(datasets["train"])
         )
 
         val_data = (
-            formatter
-            .format_dataset(
-                split["test"]
-            )
+            formatter.format_dataset(datasets["val"])
         )
 
         return {

@@ -3,52 +3,74 @@ from pathlib import Path
 from datasets import Dataset
 
 class DatasetLoader:
-    
-    def __init__(self, dataset_path):
-        self.dataset_path = Path(
-            dataset_path
-        )
+    def __init__(self, train_path, val_path=None, test_path=None):
+        self.train_path = Path(train_path)
+        self.val_path = (Path(val_path) if val_path else None)
+        self.test_path = (Path(test_path) if test_path else None)
 
-    def load(self):
+    def _load_jsonl(self, path):
+        cleaned = []
+        
         with open(
-            self.dataset_path,
+            path,
             "r",
             encoding="utf-8"
         ) as f:
-            data = json.load(f)
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
 
-        cleaned = []
+                try:
+                    sample = json.loads(line)
+                except Exception:
+                    continue
 
-        for sample in data:
-            if ("messages" not in sample):
-                continue
-            if (
-                len(sample["messages"])
-                < 2
-            ):
-                continue
+                if ("messages" not in sample):
+                    continue
 
-            cleaned.append(sample)
+                if (len(sample["messages"]) < 2):
+                    continue
 
+                cleaned.append(sample)
         return Dataset.from_list(cleaned)
 
-    def train_val_split(self, dataset, test_size=0.1):
+    def load(self):
+        datasets = {
+            "train": self._load_jsonl(self.train_path)
+        }
 
-        return dataset.train_test_split(
-            test_size=test_size,
-            seed=42
-        )
+        if self.val_path:
+            datasets["val"] = (
+                self._load_jsonl(self.val_path)
+            )
+
+        if self.test_path:
+            datasets["test"] = (
+                self._load_jsonl(self.test_path)
+            )
+        return datasets
 
     def statistics(self, dataset):
-
         total = len(dataset)
-        avg_turns = sum(
-            len(x["messages"])
-            for x in dataset
-        ) / total
+        avg_turns = (
+            sum(len(x["messages"]) for x in dataset) / total
+        )
 
         return {
             "samples": total,
             "avg_turns":
             round(avg_turns, 2)
         }
+
+    def print_stats(self, datasets):
+        print("\nDATASET STATS\n")
+
+        for name, ds in datasets.items():
+            stats = self.statistics(ds)
+            print(
+                f"{name.upper()}: "
+                f"{stats['samples']:,} samples | "
+                f"avg turns = "
+                f"{stats['avg_turns']}"
+            )
