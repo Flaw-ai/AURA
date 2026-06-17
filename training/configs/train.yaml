@@ -5,6 +5,7 @@ dataset:
   train_path: /kaggle/working/train.jsonl
   val_path: /kaggle/working/val.jsonl
   test_path: /kaggle/working/test.jsonl
+tokenizer_path: /kaggle/working/AURA/models/flaw
 output_dir: outputs/checkpoints
 seed: 42
 batch_size: 4

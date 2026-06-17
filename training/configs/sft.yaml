@@ -1,5 +1,6 @@
 task: sft
 dataset_text_field: text
+tokenizer_path: /kaggle/working/AURA/models/flaw
 max_seq_length: 2048
 packing: true
 shuffle: true

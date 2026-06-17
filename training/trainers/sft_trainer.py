@@ -18,7 +18,9 @@ from trainers.base_trainer import (
 class SFTTrainer(BaseTrainer):
     def __init__(self, config):
         super().__init__(config)
-        self.dataset_path = config["dataset_path"]
+        self.dataset_path = config["dataset"]["train_path"]
+        self.val_path = config["dataset"].get("val_path", None)
+        self.test_path = config["dataset"].get("test_path", None)
         self.config_path = config["config_path"]
         self.model = None
         self.tokenizer = None
@@ -66,8 +68,8 @@ class SFTTrainer(BaseTrainer):
         self.model = (
             FlawForCausalLM(flaw_config)
         )
-        self.tokenizer = (
-            AutoTokenizer.from_pretrained("models/flaw")
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            self.config["tokenizer_path"]
         )
 
         if self.tokenizer.pad_token is None:
