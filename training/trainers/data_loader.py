@@ -1,15 +1,12 @@
 from datasets import load_dataset
 
-class DatasetLoader:
-    def __init__(self, config):
-        self.config = config
+def load_dataset(self):
+    self.logger.info("Loading dataset...")
+    dataset = load_dataset(
+        "json",
+        data_files=str(self.dataset_path),
+        split="train"
+    )
 
-    def load(self):
-        dataset_path = self.config["dataset"]
-        dataset = load_dataset(
-            "json",
-            data_files=dataset_path,
-            split="train"
-        )
-
-        return dataset
+    self.logger.info(f"Loaded {len(dataset)} samples")
+    return dataset

@@ -1,9 +1,7 @@
-"root" :{7 items
-    "backend": "tokenizers"
-    "bos_token": "<s>"
-    "eos_token": "</s>"
-    "model_max_length": 1e+30
-    "pad_token": "<pad>"
-    "tokenizer_class": "TokenizersBackend"
-    "unk_token": "<unk>"
+{
+    "bos_token": "<s>",
+    "eos_token": "</s>",
+    "unk_token": "<unk>",
+    "pad_token": "<pad>",
+    "tokenizer_class": "PreTrainedTokenizerFast"
 }
