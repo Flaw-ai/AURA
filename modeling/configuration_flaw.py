@@ -5,7 +5,7 @@ class FlawConfig(PretrainedConfig):
     model_type = "flaw"
     def __init__(
         self,
-        vocab_size: int = 32_000,
+        vocab_size: int = 100000,
         hidden_size: int = 2048,
         intermediate_size: int = 5632,
         num_hidden_layers: int = 22,
