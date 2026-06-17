@@ -167,7 +167,7 @@ class SFTTrainer(BaseTrainer):
                 gradient_checkpointing=
                 self.config.get(
                     "gradient_checkpointing",
-                    True
+                    False
                 ),
                 report_to="none"
             )
