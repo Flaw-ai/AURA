@@ -14,6 +14,7 @@ from modeling.modeling_flaw import (
 from trainers.base_trainer import (
     BaseTrainer
 )
+from checkpoint_manager import CheckpointManager
 
 class SFTTrainer(BaseTrainer):
     def __init__(self, config):
@@ -180,7 +181,20 @@ class SFTTrainer(BaseTrainer):
             self.build_collator()
         )
         self.logger.info("Training started...")
-        trainer.train()
+        manager = CheckpointManager(self.output_dir)
+        latest = manager.latest_checkpoint()
+        if latest:
+            self.logger.info(
+                f"Resuming from {latest}"
+            )
+            trainer.train(
+                resume_from_checkpoint=latest
+            )
+        else:
+            self.logger.info(
+                "Starting fresh training"
+            )
+            trainer.train()
         trainer.save_model(self.output_dir)
         self.tokenizer.save_pretrained(self.output_dir)
         self.logger.info("Training complete.")
