@@ -14,7 +14,7 @@ from modeling.modeling_flaw import (
 from trainers.base_trainer import (
     BaseTrainer
 )
-from checkpoint_manager import CheckpointManager
+from trainers.checkpoint_manager import CheckpointManager
 
 class SFTTrainer(BaseTrainer):
     def __init__(self, config):
